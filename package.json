@@ -1,0 +1,52 @@
+{
+  "name": "duel-des-trois",
+  "productName": "Duel des Trois",
+  "version": "1.0.0",
+  "description": "Jeu de combat 2D : Le Novice, Isabella, Andric, le Dark Knight et Belzebuth.",
+  "main": "main.js",
+  "author": "Toons",
+  "license": "UNLICENSED",
+  "private": true,
+  "repository": "github:ToonsTV/duel-des-trois",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder",
+    "release": "npm version patch -m \"v%s\" && git push --follow-tags"
+  },
+  "dependencies": {
+    "electron-updater": "^6.3.9"
+  },
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.duel-des-trois.app",
+    "productName": "Duel des Trois",
+    "artifactName": "Duel-des-Trois-${version}-${os}-${arch}.${ext}",
+    "directories": { "output": "dist", "buildResources": "build" },
+    "files": ["main.js", "preload.js", "app/**/*", "build/icon.png", "package.json"],
+    "publish": [{ "provider": "github", "releaseType": "draft" }],
+    "win": { "target": [{ "target": "nsis", "arch": ["x64"] }] },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": false,
+      "deleteAppDataOnUninstall": false,
+      "shortcutName": "Duel des Trois",
+      "artifactName": "Duel-des-Trois-Setup-${version}.${ext}"
+    },
+    "mac": {
+      "category": "public.app-category.games",
+      "identity": null,
+      "target": [
+        { "target": "dmg", "arch": ["x64", "arm64"] },
+        { "target": "zip", "arch": ["x64", "arm64"] }
+      ]
+    },
+    "linux": {
+      "category": "Game",
+      "target": ["AppImage"]
+    }
+  }
+}
