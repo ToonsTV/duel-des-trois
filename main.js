@@ -19,6 +19,9 @@ if (app.isPackaged && (process.argv.some(a => /^--(inspect|remote-debugging)/i.t
 const gotLock = app.requestSingleInstanceLock();
 if (!gotLock) app.quit();
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
+app.commandLine.appendSwitch('disable-features', 'CalculateNativeWinOcclusion');   // Windows : une fenêtre cachée derrière une autre ne doit pas se figer (sinon l'adversaire attend)
+app.commandLine.appendSwitch('disable-renderer-backgrounding');
+app.commandLine.appendSwitch('disable-backgrounding-occluded-windows');
 
 const ROOT = path.join(__dirname, 'app');
 const MIME = {
