@@ -73,6 +73,27 @@ npm run release
 - Le numéro de l'étiquette (`v1.0.1`) doit être égal à `version` dans `package.json`. `npm run release` le fait pour toi.
 - L'appli doit être **installée**. Une appli lancée depuis un dossier de développement ne se met pas à jour.
 
+## Jouer en ligne (Coop à distance)
+
+Menu **Coop > À distance (en ligne)**.
+- Le joueur 1 choisit **Créer une salle** : un code de 5 lettres s'affiche (clic dessus pour le copier).
+- Le joueur 2 choisit **Rejoindre une salle**, tape (ou colle) le code et appuie sur Entrée.
+- Chacun choisit son combattant (seulement ceux qu'il a débloqués en campagne). L'hôte choisit le lieu et lance le combat.
+- Les deux joueurs doivent avoir **la même version du jeu** (les mises à jour automatiques s'en occupent) et **Internet**.
+- Pas de serveur de jeu à payer : les deux PC se connectent directement. Seule la mise en relation passe par le service gratuit PeerJS (`0.peerjs.com`). Si ce service est en panne ou bloqué (réseau de lycée, par exemple), la salle ne s'ouvre pas : le jeu l'indique.
+- Le fichier `app/peerjs.min.js` (bibliothèque PeerJS, licence MIT) doit rester dans le dossier `app`.
+
+## Touches modifiables
+
+Menu **Commandes & réglages > Réglages > Modifier les touches** : choisis une action, appuie sur Entrée, puis sur la nouvelle touche (ou le nouveau bouton de manette). Les touches sont sauvegardées. Si une touche est déjà prise par une autre action du même joueur, les deux sont échangées.
+
+## Protection contre la triche
+
+- La progression de la campagne est **signée** : si quelqu'un modifie la sauvegarde à la main, elle est refusée et remise à zéro.
+- Dans l'appli installée : pas d'outils de développement (F12 bloqué), pas de débogage à distance, le jeu ne se charge que depuis son fichier `app.asar`, et sous Windows et macOS un fichier modifié empêche le lancement.
+- Limite honnête : aucune protection n'est parfaite sur un jeu qui tourne chez le joueur. Ça bloque les modifications simples, pas un expert déterminé.
+- Si un jour la version Windows refuse de se lancer après une mise à jour, mets `DUEL_NO_INTEGRITY: "1"` dans la section `env` de l'étape `npx electron-builder` du fichier `.github/workflows/release.yml` pour désactiver le contrôle d'intégrité.
+
 ## Tester chez toi sans rien publier
 
 ```

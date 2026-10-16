@@ -11,6 +11,11 @@ protocol.registerSchemesAsPrivileged([
 ]);
 
 // Une seule fenêtre à la fois (évite les fichiers verrouillés pendant une mise à jour).
+// Protection : en version installée, on refuse le débogage à distance (qui permettrait de modifier le jeu en cours d'exécution).
+if (app.isPackaged && (process.argv.some(a => /^--(inspect|remote-debugging)/i.test(a)) ||
+    app.commandLine.hasSwitch('remote-debugging-port') || app.commandLine.hasSwitch('remote-debugging-pipe'))) {
+  app.exit(0);
+}
 const gotLock = app.requestSingleInstanceLock();
 if (!gotLock) app.quit();
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
@@ -41,15 +46,23 @@ function createWindow() {
     width: 1280, height: 720, minWidth: 640, minHeight: 360,
     backgroundColor: '#0a0910', title: 'Duel des Trois', show: false, autoHideMenuBar: true,
     icon: path.join(__dirname, 'build', 'icon.png'),
-    webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, nodeIntegration: false, sandbox: true }
+    webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, nodeIntegration: false, sandbox: true,
+      devTools: !app.isPackaged,        // pas d'outils de développement dans la version installée
+      backgroundThrottling: false }   // le jeu en ligne ne doit pas se figer si la fenêtre passe en arrière-plan
   });
   win.once('ready-to-show', () => win.show());
   win.loadURL('app://duel/index.html');
   win.webContents.setWindowOpenHandler(({ url }) => { shell.openExternal(url); return { action: 'deny' }; });
   win.webContents.on('will-navigate', (e, url) => { if (!url.startsWith('app://')) e.preventDefault(); });
   win.webContents.on('before-input-event', (e, input) => {
-    if (input.type === 'keyDown' && input.key === 'F11') { win.setFullScreen(!win.isFullScreen()); e.preventDefault(); }
+    if (input.type !== 'keyDown') return;
+    if (input.key === 'F11') { win.setFullScreen(!win.isFullScreen()); e.preventDefault(); return; }
+    if (app.isPackaged) {
+      const k = String(input.key).toLowerCase();
+      if (k === 'f12' || ((input.control || input.meta) && input.shift && ['i', 'j', 'c'].includes(k)) || (input.meta && input.alt && ['i', 'j', 'c'].includes(k))) e.preventDefault();
+    }
   });
+  if (app.isPackaged) win.webContents.on('devtools-opened', () => win.webContents.closeDevTools());
   win.on('closed', () => { win = null; });
 }
 
@@ -85,10 +98,18 @@ function setupUpdater() {
   autoUpdater.on('checking-for-update', () => send('checking'));
   autoUpdater.on('update-available', info => {
     send('available', { version: info.version });
+    if (!mac) {
+      // Prévient le joueur dans l'ancienne version : le téléchargement démarre tout seul.
+      dialog.showMessageBox(win, {
+        type: 'info', title: 'Mise à jour disponible', message: `Une nouvelle version du jeu est disponible : ${info.version}`,
+        detail: 'Elle se télécharge en arrière-plan, tu peux continuer à jouer. Quand elle sera prête, elle remplacera l’ancienne version. Ta progression est conservée.',
+        buttons: ['OK'], defaultId: 0
+      }).catch(() => {});
+    }
     if (mac) {
       dialog.showMessageBox(win, {
         type: 'info', title: 'Mise à jour disponible', message: `La version ${info.version} est disponible.`,
-        detail: 'Télécharge-la et remplace l’application pour la mettre à jour. Ta progression est conservée.',
+        detail: 'Télécharge-la, puis glisse la nouvelle application dans Applications en remplaçant l’ancienne. Ta progression est conservée.',
         buttons: ['Télécharger', 'Plus tard'], defaultId: 0, cancelId: 1
       }).then(r => { const u = repoUrl(); if (r.response === 0 && u) shell.openExternal(u); }).catch(() => {});
     }
@@ -144,6 +165,8 @@ app.whenReady().then(() => {
   });
   ipcMain.handle('get-version', () => app.getVersion());
   ipcMain.on('check-updates', () => checkUpdates(true));
+  ipcMain.on('install-update', () => { if (global.__autoUpdater) global.__autoUpdater.quitAndInstall(true, true); });
+  ipcMain.on('open-releases', () => { const u = repoUrl(); if (u) shell.openExternal(u); });
   ipcMain.on('toggle-fullscreen', () => win && win.setFullScreen(!win.isFullScreen()));
   buildMenu();
   createWindow();
