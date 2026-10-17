@@ -1,7 +1,7 @@
 {
   "name": "duel-des-trois",
   "productName": "Duel des Trois",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Jeu de combat 2D : Le Novice, Isabella, Andric, le Dark Knight et Belzebuth.",
   "main": "main.js",
   "author": "Toons",
