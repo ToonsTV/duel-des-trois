@@ -73,6 +73,16 @@ npm run release
 - Le numéro de l'étiquette (`v1.0.1`) doit être égal à `version` dans `package.json`. `npm run release` le fait pour toi.
 - L'appli doit être **installée**. Une appli lancée depuis un dossier de développement ne se met pas à jour.
 
+## Nouveautés de la v3
+- **Ultime** : jauge pleine + touche spéciale = super attaque avec animation (le temps se fige, dégâts ×1,8).
+- **Survie** : enchaîne les adversaires, la vie ne remonte jamais, record sauvegardé (protégé contre la triche).
+- **Costumes** : débloqués en finissant la campagne avec chaque personnage (menu de sélection).
+- **Histoire** : dialogues avant chaque combat de la campagne, une fin par personnage.
+- **En ligne** : pseudos affichés, manches (premier à 2 / 3 victoires), revanche automatique.
+- **Sons** : une musique par arène, volumes réglables dans « Commandes & réglages ».
+- **Classement mondial** (Survie) : voir `serveur-classement/LISEZ-MOI.md`. Facultatif.
+- Les deux joueurs en ligne doivent avoir **la même version**.
+
 ## Jouer en ligne (Coop à distance)
 
 Menu **Coop > À distance (en ligne)**.
